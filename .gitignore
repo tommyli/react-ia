@@ -1,0 +1,11 @@
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+.gradle
+/build/
+!gradle/wrapper/gradle-wrapper.jar
+/ria-ui/node_modules
+out/
