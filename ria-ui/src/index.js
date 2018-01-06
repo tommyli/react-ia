@@ -4,29 +4,54 @@ import PropTypes from 'prop-types';
 
 const node = document.getElementById('root');
 
+const data = {
+  post: {
+    id: 123,
+    content:
+      "What we hope ever to do with ease, we must first learn to do with diligence. — Samuel Johnson",
+    user: "Mark Thomas"
+  },
+  comments: [
+    {
+      id: 0,
+      user: "David",
+      content: "such. win."
+    },
+    {
+      id: 1,
+      user: "Haley",
+      content: "Love it."
+    },
+    {
+      id: 2,
+      user: "Peter",
+      content: "Who was Samuel Johnson?"
+    },
+    {
+      id: 3,
+      user: "Mitchell",
+      content: "@Peter get off Letters and do your homework"
+    },
+    {
+      id: 4,
+      user: "Peter",
+      content: "@mitchell ok :P"
+    }
+  ]
+};
+
 class Post extends Component {
+  constructor(props) {
+    super(props);
+  }
+
   render() {
-    return React.createElement(
-      "div",
-      {
-        className: "post"
-      },
-      React.createElement(
-        "h2",
-        {
-          className: "postAuthor",
-          id: this.props.id
-        },
-        this.props.user,
-        React.createElement(
-          "span",
-          {
-            className: "postBody"
-          },
-          this.props.content
-        ),
-        this.props.children
-      )
+    return (
+      <div className="post">
+        <h2 className="postAuthor">{this.props.user}</h2>
+        <span className="postBody">{this.props.content}</span>
+        {this.props.children}
+      </div>
     );
   }
 }
@@ -38,26 +63,16 @@ Post.propTypes = {
 };
 
 class Comment extends Component {
+  constructor(props) {
+    super(props);
+  }
+
   render() {
-    return React.createElement(
-      "div",
-      {
-        className: "comment"
-      },
-      React.createElement(
-        "h2",
-        {
-          className: "commentAuthor"
-        },
-        this.props.user,
-        React.createElement(
-          "span",
-          {
-            className: "commentContent"
-          },
-          this.props.content
-        )
-      )
+    return (
+      <div className="comment">
+        <h2 className="commentAuthor">{this.props.user + " : "}</h2>
+        <span className="commentContent">{this.props.content}</span>
+      </div>
     );
   }
 }
@@ -69,7 +84,6 @@ Comment.propTypes = {
 }
 
 class CreateComment extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -97,6 +111,12 @@ class CreateComment extends Component {
 
   handleSubmit(event) {
     event.preventDefault();
+
+    this.props.onCommentSubmit({
+      user: this.state.user.trim(),
+      content: this.state.content.trim()
+    });
+
     this.setState(() => ({
       user: "",
       content: ""
@@ -104,63 +124,63 @@ class CreateComment extends Component {
   }
 
   render() {
-    return React.createElement(
-      "form",
-      {
-        className: "createComment",
-        onSubmit: this.handleSubmit
-      },
-      React.createElement(
-        "input",
-        {
-          type: "text",
-          placeholder: "Your name",
-          value: this.state.user,
-          onChange: this.handleUserChange
-        }
-      ),
-      React.createElement(
-        "input",
-        {
-          type: "text",
-          placeholder: "Thoughts?",
-          value: this.state.content,
-          onChange: this.handleTextChange
-        }
-      ),
-      React.createElement(
-        "input",
-        {
-          type: "submit",
-          value: "Post"
-        }
-      )
+    return (
+      <form className="createComment" onSubmit={this.handleSubmit}>
+        <input type="text" placeholder="Your name" value={this.state.user} onChange={this.handleUserChange}/>
+        <input type="text" placeholder="Thoughts?" value={this.state.content} onChange={this.handleTextChange}/>
+        <input type="submit" value="Post"/>
+      </form>
     );
   }
 }
 
 CreateComment.propTypes = {
+  onCommentSubmit: PropTypes.func.isRequired,
   content: PropTypes.string
 }
 
-const App = React.createElement(
-  Post,
-  {
-    id: 1,
-    content: " said: This is a post!",
-    user: "Tommy"
-  },
-  React.createElement(
-    Comment,
-    {
-      id: 2,
-      user: "Bob",
-      content: " commented: This is a comment!"
-    }
-  ),
-  React.createElement(
-    CreateComment
-  )
-);
+class CommentBox extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      comments: this.props.comments
+    };
+    this.handleCommentSubmit = this.handleCommentSubmit.bind(this);
+  }
 
-render(App, node);
+  handleCommentSubmit(comment) {
+    const comments = this.state.comments;
+    comment.id = Date.now();
+    const newComments = comments.concat([comment]);
+    this.setState({
+      comments: newComments
+    });
+  }
+
+  render() {
+    return (
+      <div className="commentBox">
+        <Post id={this.props.id} content={this.props.post.content} user={this.props.post.user}>
+          {
+            this.state.comments.map(function (comment) {
+              return (
+                <Comment key={comment.id} id={comment.id} content={comment.content} user={comment.user}/>
+              );
+            })
+          }
+          <CreateComment onCommentSubmit={this.handleCommentSubmit}/>
+        </Post>
+      </div>
+    );
+  }
+}
+
+CommentBox.propTypes = {
+  post: PropTypes.object,
+  comments: PropTypes.arrayOf(PropTypes.object)
+};
+
+render(
+  <CommentBox comments={data.comments} post={data.post}/>,
+  node
+);

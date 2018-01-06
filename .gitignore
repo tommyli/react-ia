@@ -1,8 +1,9 @@
-### IntelliJ IDEA ###
+### IDE Tooling ###
 .idea
 *.iws
 *.iml
 *.ipr
+.vscode
 
 .gradle
 /build/
