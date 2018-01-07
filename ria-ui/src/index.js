@@ -45,6 +45,18 @@ class Post extends Component {
     super(props);
   }
 
+  static propTypes = {
+    user: PropTypes.string.isRequired,
+    content: PropTypes.string.isRequired,
+    id: PropTypes.number.isRequired
+  };
+
+  static defaultProps = {
+    user: "",
+    content: "",
+    id: -1
+  }
+
   render() {
     return (
       <div className="post">
@@ -56,15 +68,21 @@ class Post extends Component {
   }
 }
 
-Post.propTypes = {
-  user: PropTypes.string.isRequired,
-  content: PropTypes.string.isRequired,
-  id: PropTypes.number.isRequired
-};
-
 class Comment extends Component {
   constructor(props) {
     super(props);
+  }
+
+  static propTypes = {
+    id: PropTypes.number.isRequired,
+    content: PropTypes.string.isRequired,
+    user: PropTypes.string.isRequired
+  }
+
+  static defaultProps = {
+    id: -1,
+    content: "",
+    user: ""
   }
 
   render() {
@@ -75,12 +93,6 @@ class Comment extends Component {
       </div>
     );
   }
-}
-
-Comment.propTypes = {
-  id: PropTypes.number.isRequired,
-  content: PropTypes.string.isRequired,
-  user: PropTypes.string.isRequired
 }
 
 class CreateComment extends Component {
@@ -95,18 +107,30 @@ class CreateComment extends Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
+  static propTypes = {
+    onCommentSubmit: PropTypes.func.isRequired,
+    content: PropTypes.string
+  }
+
+  static defaultProps = {
+    onCommentSubmit: function (comment) {
+    },
+    content: ""
+  };
+
   handleUserChange(event) {
     const val = event.target.value;
-    this.setState(() => ({
+    this.setState((prevState, props) => ({
       user: val
     }));
   }
 
   handleTextChange(event) {
     const val = event.target.value;
-    this.setState({
-      content: val
-    });
+    this.setState((prevState, props) => ({
+        content: val
+      })
+    );
   }
 
   handleSubmit(event) {
@@ -117,7 +141,7 @@ class CreateComment extends Component {
       content: this.state.content.trim()
     });
 
-    this.setState(() => ({
+    this.setState((prevState, props) => ({
       user: "",
       content: ""
     }));
@@ -134,11 +158,6 @@ class CreateComment extends Component {
   }
 }
 
-CreateComment.propTypes = {
-  onCommentSubmit: PropTypes.func.isRequired,
-  content: PropTypes.string
-}
-
 class CommentBox extends Component {
   constructor(props) {
     super(props);
@@ -148,13 +167,21 @@ class CommentBox extends Component {
     this.handleCommentSubmit = this.handleCommentSubmit.bind(this);
   }
 
+  static propTypes = {
+    post: PropTypes.object,
+    comments: PropTypes.arrayOf(PropTypes.object)
+  };
+
   handleCommentSubmit(comment) {
-    const comments = this.state.comments;
-    comment.id = Date.now();
-    const newComments = comments.concat([comment]);
-    this.setState({
-      comments: newComments
-    });
+    this.setState((prevState) => {
+      const comments = prevState.comments;
+      comment.id = Date.now();
+      const newComments = comments.concat([comment]);
+
+      return {
+        comments: newComments
+      }
+    })
   }
 
   render() {
@@ -174,11 +201,6 @@ class CommentBox extends Component {
     );
   }
 }
-
-CommentBox.propTypes = {
-  post: PropTypes.object,
-  comments: PropTypes.arrayOf(PropTypes.object)
-};
 
 render(
   <CommentBox comments={data.comments} post={data.post}/>,
